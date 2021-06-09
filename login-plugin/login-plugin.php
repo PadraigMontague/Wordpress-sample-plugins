@@ -6,6 +6,7 @@ Description: A simplistic login for your custom website.
 Version: 1.0
 Author: Padraig Montague
 */
+require_once('classes/user.php');
 
 if (isset($_POST['login_btn'])){
 	
@@ -14,27 +15,16 @@ if (isset($_POST['login_btn'])){
 	
 	$username = htmlspecialchars($_POST['username']);
 	$password = htmlspecialchars($_POST['password']);
-	if(!empty($username) && !empty($password)) {
-		$query = $wpdb->get_results($wpdb->prepare("SELECT `username` FROM `wp_defaultlogin` WHERE `password` = '$password'"),ARRAY_A);
+	$userObject = new User($username, $password);
+	$userObject->login($wpdb);
 	
-		if(empty($query)){
-			$result = '';
-			echo $username;
-		}
-		else{
-			$result = $query['0']['username'];
-		}
-		
-		if($username === $result){
-			echo '<h1>Success! You are logged in</h1>';
-		}
-		else{
-			echo '<h1>Incorrect Username or Password</h1>';
-		}
-	} else {
-		echo '<h1>Please enter required data</h1>';	
-	}
-	
+}
+
+if(isset($_POST['register_btn'])) {
+	$registerUsername = htmlspecialchars($_POST['username']);
+	$registerPassword = htmlspecialchars($_POST['password']);
+	$userObject = new User($registerUsername, $registerPassword);
+	$userObject->register($wpdb);
 }
 
 function renderTemplate() {
@@ -42,6 +32,11 @@ function renderTemplate() {
 	$template = file_get_contents( plugin_dir_url(__FILE__) . '/templates/login.html');
 	echo $template;
 
+}
+
+function renderRegisterTemplate() {
+	$registerTemplate = file_get_contents(plugin_dir_url(__FILE__) . '/templates/register.html');
+	echo $registerTemplate;
 }
 
 function login_shortcode() {
@@ -52,10 +47,22 @@ function login_shortcode() {
 	
 }
 
+function registerTemplate_shortcode(){
+	ob_start();
+	add_action(init, renderRegisterTemplate());
+	return ob_get_clean();
+}
+
+//Connecting css files to main file
+
 wp_register_style('login-plugin-style', plugin_dir_url(__FILE__) . '/styles/login.css');
 wp_enqueue_style('login-plugin-style');
 
-add_shortcode( 'default_login', 'renderTemplate' );
+wp_register_style('register-template-style', plugin_dir_url(__FILE__) . '/styles/register.css');
+wp_enqueue_style('register-template-style');
+
+add_shortcode('default_login', 'renderTemplate');
+add_shortcode('default_register', 'renderRegisterTemplate');
 
 global $database_version;
 
