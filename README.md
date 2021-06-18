@@ -10,7 +10,7 @@ This repository contains wordpress plugins I have developed. These plugins will 
         
 ## Current Plugins
         - login-plugin
-        - displayData-plugin
+        - displayData-plugin (Still in development)
 
 ## Shortcode
         - [default_login]
